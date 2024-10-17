@@ -1,16 +1,55 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {  resumeGame, resetGameState } from '../Features/gameSlice';
+import { resumeGame, resetGameState } from '../Features/gameSlice';
 import { RootState } from '../store';
 import { useNavigation } from '@react-navigation/native';
+import { InterstitialAd, AdEventType, TestIds } from "react-native-google-mobile-ads";
 
 
+const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyyyyyy';
 
- const Menu = () => {
-	const navigation = useNavigation();
- const isPaused = useSelector((state: RootState) => state.game.isPaused);
- const dispatch = useDispatch();
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+  keywords: ['game', 'puzzle', 'casual'],
+});
+
+const Menu = () => {
+  const navigation = useNavigation();
+  const isPaused = useSelector((state: RootState) => state.game.isPaused);
+  const dispatch = useDispatch();
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const unsubscribeLoaded = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+      setLoaded(true);
+    });
+
+    const unsubscribeClosed = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+      setLoaded(false);
+      interstitial.load();
+    });
+
+    
+    interstitial.load();
+
+ 
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeClosed();
+    };
+  }, []);
+
+  const showAd = async () => {
+    if (loaded) {
+      await interstitial.show();
+    }
+  };
+
+  const handleNewGame = async () => {
+    await showAd();
+    dispatch(resetGameState());
+    navigation.navigate("Game");
+  };
 	 
   return (
      	<View style={styles.container}>

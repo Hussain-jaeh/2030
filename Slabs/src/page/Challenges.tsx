@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { setDifficulty, newGame } from '../Features/gameSlice';
-
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 const Challenges = () => {
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ const Challenges = () => {
   };
 
   
-
+  const adUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-8310194785589499/3796206638';
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Levels</Text>
@@ -29,7 +29,13 @@ const Challenges = () => {
       <TouchableOpacity style={styles.button3} onPress={() => handleDifficultyChange('EXPERT')}>
         <Text style={styles.buttonText}>Hard</Text>
       </TouchableOpacity>
-      
+      <BannerAd
+          unitId={adUnitId}
+          size={BannerAdSize.BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+          }}
+        />
     </View>
   );
 };
@@ -90,3 +96,10 @@ const styles = StyleSheet.create({
 });
 
 export default Challenges;
+
+
+
+
+
+
+
